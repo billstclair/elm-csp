@@ -1,7 +1,9 @@
 port module Csp exposing (..)
 
-import Html exposing (Html, div, h1, text)
+import Html exposing (Html, div, h1, text, input, button)
 import Html.App as App
+import Html.Attributes exposing (placeholder, value)
+import Html.Events exposing (onInput, onClick)
 import Random
 import Time exposing (Time, second)
 
@@ -16,7 +18,7 @@ main =
 port save : (String, Model) -> Cmd msg
 
 port request : String -> Cmd msg
-port receive : (Model -> msg) -> Sub msg
+port receive : (Maybe Model -> msg) -> Sub msg
 
 -- Copied verbatim from https://github.com/evancz/elm-todomvc/blob/master/Todo.elm
 updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
@@ -25,18 +27,19 @@ updateWithStorage msg model =
     ( newModel, cmds ) = update msg model
   in
       ( newModel
-      , Cmd.batch [ save ("main", newModel), cmds ]
+      , Cmd.batch [ save ("", newModel), cmds ]
       )
 
 -- MODEL
 
 modelVersion : Int
-modelVersion = 1
+modelVersion = 2
 
 type alias Model =
-  { version: Int,
-    random : Int
-  , time: Int
+  { version : Int
+  , random : Int
+  , time : Int
+  , name : String
   }
 
 init : Maybe Model -> (Model, Cmd Msg)
@@ -45,7 +48,9 @@ init maybeModel =
                    Nothing ->
                      { version = modelVersion
                      , random = 0
-                     , time = 0 }
+                     , time = 0
+                     , name = ""
+                     }
                    Just m ->
                      m
   in
@@ -56,6 +61,10 @@ init maybeModel =
 type Msg
   = Tick Time
   | NewRandom Int
+  | Change String
+  | Save
+  | Restore
+  | Receive (Maybe Model)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -66,13 +75,31 @@ update msg model =
        )
 
     NewRandom r ->
-      ( { model | random = r }, Cmd.none)
+      ( { model | random = r }, Cmd.none )
+
+    Change new ->
+      ( { model | name = new }, Cmd.none )
+
+    Save ->
+      ( model, save ( model.name, model ))
+
+    Restore ->
+      ( model, request model.name )
+
+    Receive maybeModel ->
+      let model' = case maybeModel of
+                       Nothing -> model
+                       Just m -> m
+      in
+          ( model', Cmd.none)
 
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every second Tick
+  Sub.batch [ Time.every second Tick
+            , receive Receive
+            ]
 
 -- VIEW
 
@@ -83,5 +110,13 @@ view model =
     , div []
       [ text "Time: "
       , text <| toString model.time
+      ]
+    , div []
+      [ input [ placeholder "Name", value model.name, onInput Change ]
+          []
+      , text " "
+      , button [ onClick Save ] [ text "Save" ]
+      , text " "
+      , button [ onClick Restore ] [ text "Restore" ]
       ]
     ]

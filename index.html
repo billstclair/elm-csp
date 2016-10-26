@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Command and Subscriptions and Ports. Oh My!</title>
+  <title>Commands and Subscriptions and Ports. Oh My!</title>
   <script type="text/javascript" src="csp2.js"></script>
 </head>
 
@@ -16,9 +16,9 @@ function storageName (name) {
 }
 
 // Must match modelVersion in csp2.elm
-var modelVersion = 1;
+var modelVersion = 2;
 
-var name = 'main';
+var name = '';
 var storedState = localStorage.getItem(storageName(name));
 var startingState = storedState ? JSON.parse(storedState) : null;
 if (startingState && startingState.version != modelVersion) {
@@ -39,7 +39,7 @@ csp.ports.request.subscribe(function(name) {
   if (state && state.version != modelVersion) {
     state = null;
   }
-  kakuro.ports.receive.send(state);
+  csp.ports.receive.send(state);
 });
 
 </script>
