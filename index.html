@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Command and Subscriptions and Ports. Oh My!</title>
+  <script type="text/javascript" src="csp2.js"></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+function storageName (name) {
+  return "Csp_" + name;
+}
+
+// Must match modelVersion in csp2.elm
+var modelVersion = 1;
+
+var name = 'main';
+var storedState = localStorage.getItem(storageName(name));
+var startingState = storedState ? JSON.parse(storedState) : null;
+if (startingState && startingState.version != modelVersion) {
+  startingState = null;
+}
+var csp = Elm.Csp.fullscreen(startingState);
+
+csp.ports.save.subscribe(function(pair) {
+  var name = pair[0];
+  var state = pair[1];   
+  var json = JSON.stringify(state);
+  localStorage.setItem(storageName(name), json);
+});
+
+csp.ports.request.subscribe(function(name) {
+  var json = localStorage.getItem(storageName(name));
+  var state = json ? JSON.parse(json) : null;
+  if (state && state.version != modelVersion) {
+    state = null;
+  }
+  kakuro.ports.receive.send(state);
+});
+
+</script>
+
+</body>
+</html>
