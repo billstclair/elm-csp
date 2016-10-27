@@ -28,7 +28,7 @@ var csp = Elm.Csp.fullscreen(startingState);
 
 csp.ports.save.subscribe(function(pair) {
   var name = pair[0];
-  var state = pair[1];   
+  var state = pair[1];
   var json = JSON.stringify(state);
   localStorage.setItem(storageName(name), json);
 });

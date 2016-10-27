@@ -15,11 +15,11 @@ http://localhost:8000
 
 And click on ```csp.elm```.
 
-You can NOT successully run ```cps2.elm``` from reactor. You must compile it into JavaScript:
+You can NOT usefully run ```cps2.elm``` from reactor. You must compile it into JavaScript:
 
 ```
 cd .../elm-csp
 elm make csp2.elm --output csp2.js
 ```
 
-And then open ```index.html``` in your browser (or click on it in the reactor home page).
+And then open ```index.html``` in your browser.

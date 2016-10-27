@@ -15,8 +15,10 @@ main =
     , subscriptions = subscriptions
     }
 
+-- save (name, model)
 port save : (String, Model) -> Cmd msg
 
+-- request name
 port request : String -> Cmd msg
 port receive : (Maybe Model -> msg) -> Sub msg
 
